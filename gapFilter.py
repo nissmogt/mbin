@@ -16,7 +16,6 @@ optional arguments:
   -h, --help     show this help message and exit
   -gf            Outputs a file containing the fraction of gaps for each
                  sequence.
-
 """
 
 import numpy as np
@@ -97,6 +96,7 @@ def main():
     parser = argparse.ArgumentParser(description='Filters sequences of a \
     Multiple-Sequence Alignment, given fraction of gaps (-) present.')
 
+    # Creates arguments for program
     parser.add_argument('msa_file', help='Multiple-Sequence Alignment file')
     parser.add_argument('gap_threshold', type=float, help='Gap threshold \
     (from 0 to 1.0) Default=0.25')
@@ -104,11 +104,12 @@ def main():
     containing the fraction of gaps for each sequence. ')
     args = parser.parse_args()
 
+    # Input arguments for gap filter function
     msa_input = args.msa_file
     gap_threshold = args.gap_threshold
     output_gap_fraction = args.gf
 
-    # Gap filter function call
+    ### Gap filter function call ###
     p = gap_filter(open(msa_input), gap_threshold, output_gap_fraction)
 
     # Write gap fractions per sequence to a file
