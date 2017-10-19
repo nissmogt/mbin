@@ -3,17 +3,20 @@
 Author: Kareem Mehrabiani
 Date: 17 October 2017
 
-usage: gapFilter.py [-h] msa_file gap_threshold
+usage: gapFilter.py [-h] [-gf] msa_file gap_threshold
 
 Filters sequences of a Multiple-Sequence Alignment, given fraction of gaps (-)
 present.
 
 positional arguments:
   msa_file       Multiple-Sequence Alignment file
-  gap_threshold  Gap threshold (from 0 to 1.0)
+  gap_threshold  Gap threshold (from 0 to 1.0) Default=0.25
 
 optional arguments:
   -h, --help     show this help message and exit
+  -gf            Outputs a file containing the fraction of gaps for each
+                 sequence.
+
 """
 
 import numpy as np
