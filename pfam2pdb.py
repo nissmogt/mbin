@@ -5,7 +5,7 @@
 ### Edited on 03/29/17 (line 94): It now outputs DI as the third column.
 ##############################################################################################
 
-import linecache 
+import linecache
 
 #take the name of files
 align = raw_input("Alignment file name: ")
@@ -19,9 +19,9 @@ print '\nDomain:\t'+domain+'\nProtein ID:\t'+protein_id+'\n'
 print 'generating matched alignment...\n'
 
 d_init = int(linecache.getline(align, 2))
-d_end = int(linecache.getline(align, 4)) 
+d_end = int(linecache.getline(align, 4))
 p_init = int(linecache.getline(align, 7))
-p_end = int(linecache.getline(align, 9)) 
+p_end = int(linecache.getline(align, 9))
 
 #domain sequence string
 l1 = linecache.getline(align, 3)
@@ -72,7 +72,7 @@ output1.close()
 
 ## Matching
 
-output2 = open(align+"_mapped.di", "w")
+output2 = open(align + "_mapped.fn", "w")
 
 #open the ID file with ranking pairs
 f=open(ranked,'r')
@@ -90,12 +90,11 @@ for i in range(1,len(f.readlines())):
 	pair1 = pair.split()[0]
 	pair2 = pair.split()[1]
 	try:
-		if pair1 and pair2 in dic:	
-			#output2.write(dic[pair1]+'\t'+dic[pair2]+'\t'+pair.split()[2]+'\n')
-			output2.write(dic[pair1]+'\t'+dic[pair2]+'\n')
+		if pair1 and pair2 in dic:
+			output2.write(dic[pair1]+'\t'+dic[pair2]+'\t'+pair.split()[2]+'\n')
+			# output2.write(dic[pair1]+'\t'+dic[pair2]+'\n')
 	except KeyError:
 		pass
-     
-output2.close()
-print "\nFile saved as: "+align+"_mapped.di\n\n"
 
+output2.close()
+print "\nFile saved as: "+align+"_mapped.fn\n\n"
