@@ -20,19 +20,19 @@ def reduce_chain(contact_map, nres, cutoff):
     import numpy as np
 
     #Calculates chain number by integer division
-    contacts = np.loadtxt(contact_map, dtype=np.int32)
+    contacts = np.loadtxt(contact_map, usecols=(1,3), dtype=np.int32)
     chains = np.divide(contacts-1, nres)
     chain_filename = 'chains_' + str(cutoff) + 'A'
     np.savetxt(chain_filename, chains+1, fmt='%3i')
 
-    #Creates a place-holder array of zeros of size ( # of contacts, # of columns)
+    #Creates a place-holder array of zeros of size (# of contacts, # of columns)
     reduced_array = np.zeros((contacts.size/2,2))
 
     #Returns the remainder based on the number of residues in a monomer
     np.remainder(contacts, nres, reduced_array)
     reduced_array[reduced_array==0] = nres
 
-    #Sorts reduced array so that the contacts appear (on a plot) on the top diagonal
+    #Sort reduced array to appear (on a plot) on the top diagonal
     sorted_array = np.sort(reduced_array)
 
     #Saves the array to a file
