@@ -3,73 +3,68 @@
 #   reduce-2-mon.py                                                            #
 #   Author: Kareem Mehrabiani                                                  #
 #   Created: June 6, 2016                                                      #
+#   Edited: April 25, 2018                                                     #
 #                                                                              #
 #   What does it do?                                                           #
 #   Collapses homo-oligomeric protein contacts into a monomer so interfacial   #
 #   contacts appear together with the monomer contacts.                        #
 #                                                                              #
-#   You need:                                                                  #
-#           -a contact file                                                    #
-#           -to know number of residues in a monomer (example: Monomeric       #
-#            actin has 375 residues, but N*375 in an N-mer so use 375)         #
-#                                                                              #
-#   Usage: python reduce-2-mon.py [contact_file]                               #
+#   Usage: python reduce-2-mon.py [contact_file] [length of monomer] [cutoff]  #
 #   NOTE: The [contact_file] must only contain pairs i and j. No Chains!       #
 #                                                                              #
 ################################################################################
 
-import numpy as np
-import sys
-import re
 
-#/* INITIAL STUFF -------------------------------------------------------------
+## Reduce chain function definition ##
+def reduce_chain(contact_map, nres, cutoff):
+    import numpy as np
 
-#Checks whether an input file was given (returns an error if False)
-script_name = sys.argv[0]
-if len(sys.argv) != 2:
-    print "\nERROR: Please provide an input file after the script name."
-    print "USAGE: %s [input_file]\n" % script_name
-    exit(1)
+    #Calculates chain number by integer division
+    contacts = np.loadtxt(contact_map, dtype=np.int32)
+    chains = np.divide(contacts-1, nres)
+    chain_filename = 'chains_' + str(cutoff) + 'A'
+    np.savetxt(chain_filename, chains+1, fmt='%3i')
 
-filename = sys.argv[1]
+    #Creates a place-holder array of zeros of size ( # of contacts, # of columns)
+    reduced_array = np.zeros((contacts.size/2,2))
 
-#Imports contact_file and converts it into a numpy array
-#Also checks if filename exists
-try:
-    contacts = np.loadtxt(filename, dtype=np.int32)
-except IOError:
-    print "File '%s' doesn't exist. Perhaps check spelling?\n" % filename
-    exit(1)
+    #Returns the remainder based on the number of residues in a monomer
+    np.remainder(contacts, nres, reduced_array)
+    reduced_array[reduced_array==0] = nres
 
-#Extract number from filename for creating output filenames
-regex = re.compile(r'\d+')
-atom_res = regex.findall(filename)[0]
-#print atom_res
+    #Sorts reduced array so that the contacts appear (on a plot) on the top diagonal
+    sorted_array = np.sort(reduced_array)
 
-#Number of residues in a monomer ***this may change if there are missing residues
-#nres = 375     #actin
-nres = 325      #mamk
-#nres = 600     #hsp70
+    #Saves the array to a file
+    main_outfile = 'reduced_pdb_' + atom_res + 'A.contacts'
+    np.savetxt(main_outfile, sorted_array, fmt='%3i')
 
-#/* PROCESSING THE ARRAY ------------------------------------------------------
+    print "\nCreated '%s' and '%s'\nEnjoy :)\n" % (chain_filename, main_outfile)
 
-#Calculates chain number by integer division
-chains = np.divide(contacts-1, nres)
-chain_filename = 'chains_' + atom_res + 'A'
-np.savetxt(chain_filename, chains+1, fmt='%3i')
+## Main Script ##
+def main():
+    """
+    Main function that calls reduce_chain().
+    """
 
-#Creates a place-holder array of zeros of size ( # of contacts, # of columns)
-reduced_array = np.zeros((contacts.size/2,2))
+    import argparse
 
-#Returns the remainder based on the number of residues in a monomer
-np.remainder(contacts, nres, reduced_array)
-reduced_array[reduced_array==0] = nres
+    parser = argparse.ArgumentParser(description="What do I do? Collapses\
+        multichain protein pairs into one chain.")
 
-#Sorts reduced array so that the contacts appear (on a plot) on the top diagonal
-sorted_array = np.sort(reduced_array)
+    # Arguments
+    parser.add_argument("contact_map", help="Column list of pairs.")
+    parser.add_argument("length_monomer", type=int, help="Number of residues in\
+            a monomer. Pay attention to missing residues.")
+    parser.add_argument("cutoff", type=int, help="Cutoff used to make map.")
+    args = parser.parse_args()
 
-#Saves the array to a file
-main_outfile = 'reduced_pdb_' + atom_res + 'A.contacts'
-np.savetxt(main_outfile, sorted_array, fmt='%3i')
+    contacts = args.contact_map 
+    nres = args.length_monomer
+    cutoff = args.cutoff
 
-print "\nCreated '%s' and '%s'\nEnjoy :)\n" % (chain_filename, main_outfile)
+    reduce_chain(contacts, nres, cutoff)
+
+if __name__=='__main__':
+    main()
+
