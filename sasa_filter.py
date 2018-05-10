@@ -29,19 +29,24 @@ def sasa_cutoff(contact_file, number_of_contacts, sasa_file, cutoff):
     to filter out DCA pairs that have a SASA ratio < cutoff.
     """
     res_i, res_j, dca_score = np.loadtxt(contact_file, unpack=True)
-    sasa_residue, sasa_ratio = np.loadtxt(sasa_file, unpack=True)
+    sasa_residue, sasa_ratio = np.genfromtxt(sasa_file, unpack=True, \
+            usecols=(1,6), skip_header=1, skip_footer=10)
+    sasa_dict = dict(zip(sasa_residue, sasa_ratio))
 
     out = []
     for i in range(len(res_i[:number_of_contacts])):
-        for j in range(len(sasa_residue)):
-            if (res_i[i] == sasa_residue[j] or res_j[i] == sasa_residue[j]):
-                if (sasa_ratio[j] >= cutoff):
-                    out.append([res_i[i],res_j[i],dca_score[i],sasa_ratio[j]])
+        try:
+            if (sasa_dict[res_i[i]] >= cutoff or sasa_dict[res_j[i]] >= cutoff):
+                out.append([res_i[i], res_j[i], dca_score[i], \
+                        sasa_dict[res_i[i]], sasa_dict[res_j[i]]])
+        except KeyError:
+            print('Residue %d or %d not found in sasa file.\n' % \
+                    (res_i[i], res_j[i]))
 
     numpy_array = np.array(out)
-    index = 'residue_i\tresidue_j\tfn\tsasa_ratio'
+    index = 'residue_i\tresidue_j\tfn\tsasa_ratio_i\tsasa_ratio_j'
     np.savetxt(contact_file+'_sasa_'+str(cutoff), numpy_array, \
-            fmt='%d\t%d\t%.5f\t%.1f', header=index)
+            fmt='%d\t%d\t%.5f\t%.2f\t%.2f', header=index)
 
     print "DCA pairs > SASA cutoff: %d%%\n" % \
             (len(out)/float(number_of_contacts)*100)
